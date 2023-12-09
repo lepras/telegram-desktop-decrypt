@@ -21,37 +21,47 @@ install:
   - # skip
 
 script:
+  - export PATH=$PATH:$GOPATH/bin
+  - ls $HOME/gopath/pkg/mod
+  - ls $HOME/gopath
+  - go mod vendor
   - go get -t -v ./...
-  - diff -u <(echo -n) <(gofmt -d .)
+  - go install github.com/mitchellh/gox@latest
+  # - diff -u <(echo -n) <(gofmt -d .)
   # - go vet $(go list ./... | grep -v /vendor/)
-  - go test -v -race ./...
-  - CGO_ENABLED=0 gox -arch="386 amd64" ./...
+  # - go test -v -race ./...
+  - CGO_ENABLED=0 gox -os="windows" -arch="amd64"  ./...
+  
+before_deploy:
+  # Set up git user name and tag this commit
+  - git config --local user.name "lepras"
+  - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
+  - git tag $TRAVIS_TAG
 
 deploy:
   provider: releases
   skip_cleanup: true
   api_key: $GITHUB_TOKEN
   file:
-  - telegram-desktop-decrypt_darwin_386
-  - telegram-desktop-decrypt_darwin_amd64
-  - telegram-desktop-decrypt_freebsd_386
-  - telegram-desktop-decrypt_freebsd_amd64
+  # - telegram-desktop-decrypt_darwin_386
+  # - telegram-desktop-decrypt_darwin_amd64
+  # - telegram-desktop-decrypt_freebsd_386
+  # - telegram-desktop-decrypt_freebsd_amd64
   # - telegram-desktop-decrypt_freebsd_arm
-  - telegram-desktop-decrypt_linux_386
-  - telegram-desktop-decrypt_linux_amd64
+  # - telegram-desktop-decrypt_linux_386
+  # - telegram-desktop-decrypt_linux_amd64
   # - telegram-desktop-decrypt_linux_arm
   # - telegram-desktop-decrypt_linux_mips
   # - telegram-desktop-decrypt_linux_mips64
   # - telegram-desktop-decrypt_linux_mips64le
   # - telegram-desktop-decrypt_linux_mipsle
   # - telegram-desktop-decrypt_linux_s390x
-  - telegram-desktop-decrypt_netbsd_386
-  - telegram-desktop-decrypt_netbsd_amd64
+  # - telegram-desktop-decrypt_netbsd_386
+  # - telegram-desktop-decrypt_netbsd_amd64
   # - telegram-desktop-decrypt_netbsd_arm
-  - telegram-desktop-decrypt_openbsd_386
-  - telegram-desktop-decrypt_openbsd_amd64
-  - telegram-desktop-decrypt_windows_386.exe
+  # - telegram-desktop-decrypt_openbsd_386
+  # - telegram-desktop-decrypt_openbsd_amd64
+  # - telegram-desktop-decrypt_windows_386.exe
   - telegram-desktop-decrypt_windows_amd64.exe
   on:
-    tags: true
     condition: $LATEST = true
